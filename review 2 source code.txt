@@ -1,0 +1,293 @@
+import React, { useState } from "react";
+
+function App() {
+const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+const [events, setEvents] = useState([
+{ id: 1, name: "Tech Fest", tickets: 50 },
+{ id: 2, name: "Hackathon", tickets: 30 },
+{ id: 3, name: "Cultural Night", tickets: 40 },
+]);
+
+const [selectedEvent, setSelectedEvent] = useState(null);
+const [name, setName] = useState("");
+const [email, setEmail] = useState("");
+const [tickets, setTickets] = useState("");
+const [message, setMessage] = useState("");
+
+const [registeredUsers, setRegisteredUsers] = useState([]);
+
+const handleLogout = () => {
+setIsLoggedIn(false);
+};
+
+const handleBooking = () => {
+if (!selectedEvent) {
+setMessage("Select an event first");
+return;
+}
+
+if (!name || !email || !tickets) {
+  setMessage("Please fill all fields");
+  return;
+}
+
+if (!email.includes("@")) {
+  setMessage("Invalid email");
+  return;
+}
+
+const updatedEvents = events.map((e) => {
+  if (e.id === selectedEvent.id) {
+    if (tickets > e.tickets) {
+      setMessage("Not enough tickets");
+      return e;
+    }
+
+    // save user
+    setRegisteredUsers([
+      ...registeredUsers,
+      { name, email, event: e.name, tickets }
+    ]);
+
+    setMessage("✅ Booking successful!");
+
+    return { ...e, tickets: e.tickets - tickets };
+  }
+  return e;
+});
+
+setEvents(updatedEvents);
+
+// clear form
+setName("");
+setEmail("");
+setTickets("");
+
+};
+
+if (!isLoggedIn) {
+return (
+<div style={styles.logoutScreen}>
+<h1>You are logged out</h1>
+<button onClick={() => setIsLoggedIn(true)} style={styles.button}>
+Login Again
+</button>
+</div>
+);
+}
+
+return (
+<div style={styles.container}>
+
+  {/* NAVBAR */}
+  <div style={styles.nav}>
+    <h2>🎓 Campus Events Hub</h2>
+    <button style={styles.logoutBtn} onClick={handleLogout}>
+      Logout
+    </button>
+  </div>
+
+  {/* HERO */}
+  <div style={styles.hero}>
+    <h1>Discover what's happening on campus</h1>
+    <p>Workshops, seminars, and cultural events.</p>
+  </div>
+
+  {/* EVENTS */}
+  <h2 style={styles.title}>Available Events</h2>
+
+  <div style={styles.grid}>
+    {events.map((event) => (
+      <div
+        key={event.id}
+        style={{
+          ...styles.card,
+          border:
+            selectedEvent?.id === event.id
+              ? "2px solid #22c55e"
+              : "1px solid #1f2937",
+        }}
+      >
+        <h3>{event.name}</h3>
+        <p>Tickets Left: {event.tickets}</p>
+
+        <button
+          style={styles.button}
+          onClick={() => setSelectedEvent(event)}
+        >
+          Select
+        </button>
+      </div>
+    ))}
+  </div>
+
+  {/* BOOKING FORM */}
+  {selectedEvent && (
+    <div style={styles.form}>
+      <h3>Book for: {selectedEvent.name}</h3>
+
+      <input
+        style={styles.input}
+        placeholder="Enter Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <input
+        style={styles.input}
+        placeholder="Enter Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        style={styles.input}
+        type="number"
+        placeholder="Number of Tickets"
+        value={tickets}
+        onChange={(e) => setTickets(Number(e.target.value))}
+      />
+
+      <button style={styles.button} onClick={handleBooking}>
+        Book Ticket
+      </button>
+
+      <p style={styles.message}>{message}</p>
+    </div>
+  )}
+
+  {/* REGISTERED USERS */}
+  {registeredUsers.length > 0 && (
+    <div style={styles.users}>
+      <h3>👥 Registered Members</h3>
+
+      {registeredUsers.map((user, index) => (
+        <div key={index} style={styles.userCard}>
+          <p><b>Name:</b> {user.name}</p>
+          <p><b>Email:</b> {user.email}</p>
+          <p><b>Event:</b> {user.event}</p>
+          <p><b>Tickets:</b> {user.tickets}</p>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+);
+}
+
+const styles = {
+container: {
+fontFamily: "Arial",
+padding: "20px",
+background: "#020617",
+color: "white",
+minHeight: "100vh",
+},
+
+nav: {
+display: "flex",
+justifyContent: "space-between",
+background: "#020617",
+padding: "15px",
+borderBottom: "1px solid #22c55e",
+},
+
+logoutBtn: {
+background: "#22c55e",
+border: "none",
+padding: "8px 15px",
+borderRadius: "6px",
+cursor: "pointer",
+fontWeight: "bold",
+},
+
+hero: {
+background: "linear-gradient(to right, #022c22, #065f46)",
+padding: "50px",
+marginTop: "15px",
+borderRadius: "12px",
+textAlign: "center",
+},
+
+title: {
+marginTop: "30px",
+},
+
+grid: {
+display: "flex",
+gap: "20px",
+marginTop: "20px",
+flexWrap: "wrap",
+},
+
+card: {
+padding: "20px",
+borderRadius: "12px",
+width: "220px",
+background: "#111827",
+boxShadow: "0 5px 15px rgba(0,0,0,0.6)",
+},
+
+button: {
+marginTop: "10px",
+padding: "10px",
+background: "#22c55e",
+color: "black",
+border: "none",
+borderRadius: "6px",
+cursor: "pointer",
+width: "100%",
+fontWeight: "bold",
+},
+
+form: {
+marginTop: "30px",
+display: "flex",
+flexDirection: "column",
+gap: "10px",
+width: "320px",
+background: "#111827",
+padding: "20px",
+borderRadius: "12px",
+},
+
+input: {
+padding: "10px",
+borderRadius: "6px",
+border: "none",
+},
+
+message: {
+marginTop: "10px",
+color: "#22c55e",
+},
+
+users: {
+marginTop: "40px",
+background: "#020617",
+padding: "20px",
+borderRadius: "12px",
+},
+
+userCard: {
+marginTop: "10px",
+padding: "10px",
+background: "#111827",
+borderRadius: "6px",
+borderLeft: "4px solid #22c55e",
+},
+
+logoutScreen: {
+height: "100vh",
+display: "flex",
+flexDirection: "column",
+justifyContent: "center",
+alignItems: "center",
+background: "#020617",
+color: "white",
+},
+};
+
+export default App;
